@@ -1,7 +1,9 @@
+
 import argparse
 import sqlite3
 from pathlib import Path
 import pandas as pd
+from preprocess import preprocess_movies_df
 
 # Nome da tabela que será criada/populada no banco SQLite
 TABLE_NAME = "movies"
@@ -50,16 +52,18 @@ def insert_dataframe(conn: sqlite3.Connection, df: pd.DataFrame):
 
 def main(csv_path: str, out_dir: str):
   out_dir = Path(out_dir)
-  out_dir.mkdir(parents=True, exist_ok=True) 
+  out_dir.mkdir(parents=True, exist_ok=True)
   df_raw = pd.read_csv(csv_path, sep=",", quotechar='"', encoding="utf-8", low_memory=False)
+  # Aplicar preprocessamento
+  df = preprocess_movies_df(df_raw)
 
   prod_path = out_dir / "production.db"
-  if prod_path.exists(): 
+  if prod_path.exists():
     prod_path.unlink()
   conn = sqlite3.connect(str(prod_path))
   try:
     create_table(conn)
-    insert_dataframe(conn, df_raw)  
+    insert_dataframe(conn, df)  # Inserir dados já preprocessados
   finally:
     conn.close()
   print("Bancos criados em:", out_dir)
