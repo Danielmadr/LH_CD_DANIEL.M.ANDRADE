@@ -109,8 +109,7 @@ def plot_top_recommendations(df: pd.DataFrame):
 
 def page_analysis():
     st.title("Análise Exploratória de Dados (EDA)")
-    st.write("Explore relações entre variáveis, descubra gêneros populares e veja recomendações baseadas em alta nota e popularidade.")
-
+    
     db_path = "data/production.db"
     try:
         df = carregar_dados_db(db_path)
@@ -118,13 +117,28 @@ def page_analysis():
         st.error(f"Erro ao carregar dados do banco: {e}")
         return
 
-    st.subheader("Matriz de Correlação entre Variáveis Numéricas")
-    st.markdown("Veja como as principais variáveis numéricas dos filmes se relacionam entre si. A matriz de correlação abaixo destaca as relações mais fortes, tanto positivas quanto negativas, que podem influenciar o desempenho e a recepção dos filmes.")
-    plot_correlation_matrix(df)
+    # Criar abas para diferentes tipos de análise
+    tab1, tab2, tab3, tab4 = st.tabs(["🔗 Correlações Gerais", "🏆 Recomendações", "🎯 Análise de Faturamento", "📊 Análise das Visões Gerais dos Filmes"])
 
-    st.subheader("Top 10 Filmes Recomendados (Alta Nota e Popularidade)")
-    st.markdown("Confira os filmes mais recomendados, considerando tanto a avaliação do público quanto a popularidade. Os gráficos a seguir mostram a distribuição dos filmes populares e os gêneros mais frequentes entre eles.")
-    plot_top_recommendations(df)
+    with tab1:
+        st.subheader("Matriz de Correlação entre Variáveis Numéricas")
+        st.markdown("Veja como as principais variáveis numéricas dos filmes se relacionam entre si. A matriz de correlação abaixo destaca as relações mais fortes, tanto positivas quanto negativas, que podem influenciar o desempenho e a recepção dos filmes.")
+        plot_correlation_matrix(df)
+    
+    with tab2:
+        st.subheader("Top 10 Filmes Recomendados (Alta Nota e Popularidade)")
+        st.markdown("Confira os filmes mais recomendados, considerando tanto a avaliação do público quanto a popularidade. Os gráficos a seguir mostram a distribuição dos filmes populares e os gêneros mais frequentes entre eles.")
+        plot_top_recommendations(df)
+    
+    with tab3:
+        st.subheader("Análise de Faturamento")
+        st.markdown("Nesta seção, vamos explorar os fatores que influenciam o faturamento dos filmes.")
+    # Nova análise focada em faturamento
+    # analise_fatores_faturamento(df)
+
+    with tab4:
+        st.subheader("Análise das Visões Gerais dos Filmes")
+        st.markdown("Nesta seção, vamos explorar as visões gerais dos filmes, incluindo aspectos como direção, elenco e produção.")
 
 if __name__ == "__main__":
     page_analysis()
