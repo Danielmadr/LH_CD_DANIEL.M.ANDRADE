@@ -40,3 +40,22 @@ A matriz de correlação revela algumas relações interessantes entre as variá
 - **Released_Year x Gross (0.23):** Filmes mais recentes tendem a ter um Faturamento um pouco maior, o que pode ser explicado por inflação, maior alcance de distribuição ou crescimento do mercado cinematográfico.
 
 - **IMDB_Rating x Gross (0.10):** Apesar de esperado, a correlação entre nota do IMDB e Faturamento (**0.10**) é fraca, indicando que **sucesso financeiro nem sempre significa qualidade percebida**.
+
+## 4. Análise das Recomendações e Filme Destaque
+
+Com base nos critérios de recomendação, nota IMDB ≥ 8.0, número de votos acima do percentil 70 e pertencimento aos gêneros mais populares, foi possível identificar os filmes mais bem avaliados e populares do conjunto de dados.
+
+A análise mostra que filmes que atendem a esses critérios tendem a ser reconhecidos tanto pela crítica quanto pelo público, além de pertencerem a gêneros de grande apelo. Os gráficos apresentados evidenciam a predominância de certos gêneros e a relação entre popularidade (votos) e avaliação.
+
+### Filme Recomendado
+
+Entre os filmes analisados, destaca-se o filme com maior nota IMDB e número de votos e genero popular dentro dos critérios estabelecidos. Recomenda-se, portanto:
+
+> **Filme Recomendado:**  
+> _The Godfather_  
+> **Nota IMDB:** 9.2  
+> **Número de Votos:** 1.620.367  
+> **Gênero:** Crime, Drama  
+> **Ano de Lançamento:** 1972
+
+Essa recomendação é baseada em dados objetivos de avaliação, popularidade e genero, garantindo uma escolha de destaque para quem busca qualidade e reconhecimento do público.
