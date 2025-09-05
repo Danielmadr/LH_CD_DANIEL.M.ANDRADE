@@ -5,6 +5,8 @@ import sqlite3
 import plotly.express as px
 import re
 from collections import Counter
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
 
 
 def carregar_dados_db(db_path):
@@ -37,7 +39,7 @@ def plot_correlation_matrix(df: pd.DataFrame):
         width=800,
         height=600
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
     # Extrair correlações mais altas (excluindo diagonal)
     st.subheader("Principais Correlações")
@@ -85,7 +87,7 @@ def plot_top_recommendations(df: pd.DataFrame):
         labels={'No_of_Votes': 'Número de Votos', 'IMDB_Rating': 'Rating IMDB'}
     )
     fig1.update_xaxes(type='log')
-    st.plotly_chart(fig1, use_container_width=True)
+    st.plotly_chart(fig1, width='stretch')
 
     # Gráfico 2: Distribuição por gênero dos filmes bem avaliados
     genre_counts = popular['Genre'].value_counts().head(10)
@@ -97,7 +99,7 @@ def plot_top_recommendations(df: pd.DataFrame):
         labels={'x': 'Número de Filmes', 'y': 'Gênero'}
     )
     fig2.update_layout(yaxis={'categoryorder': 'total ascending'})
-    st.plotly_chart(fig2, use_container_width=True)
+    st.plotly_chart(fig2, width='stretch')
 
     # Top 10 filmes recomendados (desempate por votos)
     top_recommendations = popular.sort_values(
@@ -158,7 +160,7 @@ def analise_fatores_faturamento(df: pd.DataFrame):
         )
         fig_corr.update_traces(texttemplate='%{text:.3f}', textposition='outside')
         fig_corr.update_layout(yaxis={'categoryorder': 'total ascending'})
-        st.plotly_chart(fig_corr, use_container_width=True)
+        st.plotly_chart(fig_corr, width='stretch')
         
         # Tabela de correlações
         st.dataframe(corr_df[['Variável', 'Correlação']].round(3))
@@ -186,7 +188,7 @@ def analise_fatores_faturamento(df: pd.DataFrame):
         title='Distribuição de Faturamento por Faixa de Rating IMDB'
     )
     fig_box.update_yaxes(title='Faturamento (US$)')
-    st.plotly_chart(fig_box, use_container_width=True)
+    st.plotly_chart(fig_box, width='stretch')
     
     st.dataframe(rating_stats)
     
@@ -210,7 +212,7 @@ def analise_fatores_faturamento(df: pd.DataFrame):
         labels={'x': 'Gênero', 'y': 'Faturamento Médio (US$)'}
     )
     fig_genero.update_xaxes(tickangle=45)
-    st.plotly_chart(fig_genero, use_container_width=True)
+    st.plotly_chart(fig_genero, width='stretch')
     
     st.dataframe(genero_stats_filtered)
     
@@ -230,7 +232,7 @@ def analise_fatores_faturamento(df: pd.DataFrame):
         labels={'x': 'Década', 'y': 'Faturamento Médio (US$)'},
         markers=True
     )
-    st.plotly_chart(fig_decada, use_container_width=True)
+    st.plotly_chart(fig_decada, width='stretch')
     return df_revenue
 
 def analise_overview_insights(df: pd.DataFrame):
@@ -288,7 +290,7 @@ def analise_overview_insights(df: pd.DataFrame):
         title='Distribuição do Comprimento das Descrições',
         labels={'overview_length': 'Comprimento (caracteres)', 'count': 'Frequência'}
     )
-    st.plotly_chart(fig_length, use_container_width=True)
+    st.plotly_chart(fig_length, width='stretch')
     
     # ========== ANÁLISE DE PALAVRAS-CHAVE ==========
     st.subheader("🔍 Palavras-Chave Mais Frequentes")
@@ -326,7 +328,7 @@ def analise_overview_insights(df: pd.DataFrame):
             labels={'Frequência': 'Número de Ocorrências', 'Palavra': 'Palavra-Chave'}
         )
         fig_keywords.update_layout(yaxis={'categoryorder': 'total ascending'})
-        st.plotly_chart(fig_keywords, use_container_width=True)
+        st.plotly_chart(fig_keywords, width='stretch')
         
         st.dataframe(keywords_df.head(15))
     
@@ -369,9 +371,80 @@ def analise_overview_insights(df: pd.DataFrame):
                         color_continuous_scale='viridis'
                     )
                     fig_genre.update_layout(yaxis={'categoryorder': 'total ascending'})
-                    st.plotly_chart(fig_genre, use_container_width=True)
+                    st.plotly_chart(fig_genre, width='stretch')
                     
                     st.dataframe(genre_df)
+    
+    # ========== NUVEM DE PALAVRAS POR GÊNERO ==========
+    st.subheader("☁️ Nuvem de Palavras por Gênero")
+    st.markdown("Visualização das palavras mais frequentes em forma de nuvem para cada gênero de filme.")
+    
+    # Criar nuvens de palavras para os top 5 gêneros
+    top_5_genres = df_overview['Genero_Principal'].value_counts().head(5).index.tolist()
+    
+    # Garantir que Crime e Biography estejam incluídos se existirem no dataset
+    genres_of_interest = ['Crime', 'Biography']
+    for genre in genres_of_interest:
+        if genre in df_overview['Genero_Principal'].values and genre not in top_5_genres:
+            top_5_genres.append(genre)
+    
+    # Limitar a um máximo de 5 gêneros para melhor visualização
+    display_genres = top_5_genres[:5]
+    
+    if len(display_genres) > 0:
+        # Criar colunas para exibir as nuvens lado a lado
+        cols = st.columns(len(display_genres))
+        
+        for i, genre in enumerate(display_genres):
+            with cols[i]:
+                # Combinar todas as descrições do gênero
+                genre_overviews = df_overview[df_overview['Genero_Principal'] == genre]['Overview']
+                genre_text = ' '.join(genre_overviews.dropna().astype(str))
+                
+                # Limpar o texto
+                genre_text_clean = re.sub(r'[^\w\s]', ' ', genre_text.lower())
+                
+                # Palavras a serem removidas (stop words expandidas)
+                stop_words = {
+                    'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 
+                    'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 
+                    'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'his', 'her', 'its', 
+                    'their', 'he', 'she', 'it', 'they', 'him', 'them', 'this', 'that', 'these', 'those', 
+                    'when', 'where', 'why', 'how', 'what', 'who', 'which', 'whom', 'whose', 'if', 'because', 
+                    'while', 'during', 'before', 'after', 'above', 'below', 'up', 'down', 'out', 'off', 
+                    'over', 'under', 'again', 'further', 'then', 'once', 'one', 'two', 'three', 'as', 'from',
+                    'into', 'through', 'between', 'about', 'against', 'upon', 'within', 'without', 'around',
+                    'becomes', 'become', 'finds', 'find', 'gets', 'get', 'goes', 'go', 'comes', 'come',
+                    'takes', 'take', 'makes', 'make', 'gives', 'give', 'tries', 'try', 'tells', 'tell'
+                }
+                
+                if len(genre_text_clean.strip()) > 0:
+                    try:
+                        # Criar a nuvem de palavras
+                        wordcloud = WordCloud(
+                            width=400, 
+                            height=300, 
+                            background_color='white',
+                            stopwords=stop_words,
+                            max_words=50,
+                            colormap='viridis',
+                            min_font_size=10
+                        ).generate(genre_text_clean)
+                        
+                        # Criar figura matplotlib
+                        fig, ax = plt.subplots(figsize=(6, 4))
+                        ax.imshow(wordcloud, interpolation='bilinear')
+                        ax.axis('off')
+                        ax.set_title(f'{genre}', fontsize=14, fontweight='bold', pad=20)
+                        
+                        # Exibir no Streamlit
+                        st.pyplot(fig, width='stretch')
+                        plt.close(fig)  # Limpar a figura para evitar warnings
+                        
+                    except Exception as e:
+                        st.warning(f"Não foi possível gerar nuvem de palavras para {genre}: {str(e)}")
+                else:
+                    st.warning(f"Texto insuficiente para gerar nuvem de palavras para {genre}")
     
     return df_overview
 
