@@ -293,15 +293,26 @@ def analise_overview_insights(df: pd.DataFrame):
     st.plotly_chart(fig_length, width='stretch')
     
     # ========== ANÁLISE DE PALAVRAS-CHAVE ==========
+    # Definir stop words básicas
+    stop_words = {
+        'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 
+        'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 
+        'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'his', 'her', 'its', 
+        'their', 'he', 'she', 'it', 'they', 'him', 'them', 'this', 'that', 'these', 'those', 
+        'when', 'where', 'why', 'how', 'what', 'who', 'which', 'whom', 'whose', 'if', 'because', 
+        'while', 'during', 'before', 'after', 'above', 'below', 'up', 'down', 'out', 'off', 
+        'over', 'under', 'again', 'further', 'then', 'once', 'one', 'two', 'three', 'as', 'from',
+        'into', 'through', 'between', 'about', 'against', 'upon', 'within', 'without', 'around',
+        'becomes', 'become', 'finds', 'find', 'gets', 'get', 'goes', 'go', 'comes', 'come',
+        'takes', 'take', 'makes', 'make', 'gives', 'give', 'tries', 'try', 'tells', 'tell'
+    }
     st.subheader("🔍 Palavras-Chave Mais Frequentes")
     
     # Função para limpar e extrair palavras
     def extract_keywords(text):
         # Converter para minúsculo e remover pontuação
         text = re.sub(r'[^\w\s]', ' ', text.lower())
-        # Remover palavras muito comuns (stop words básicas)
-        stop_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'his', 'her', 'its', 'their', 'he', 'she', 'it', 'they', 'him', 'them', 'this', 'that', 'these', 'those', 'when', 'where', 'why', 'how', 'what', 'who', 'which', 'whom', 'whose', 'if', 'because', 'while', 'during', 'before', 'after', 'above', 'below', 'up', 'down', 'out', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'from'}
-        
+    
         words = text.split()
         # Filtrar palavras com mais de 2 caracteres que não são stop words
         keywords = [word for word in words if len(word) > 2 and word not in stop_words]
@@ -403,20 +414,6 @@ def analise_overview_insights(df: pd.DataFrame):
                 
                 # Limpar o texto
                 genre_text_clean = re.sub(r'[^\w\s]', ' ', genre_text.lower())
-                
-                # Palavras a serem removidas (stop words expandidas)
-                stop_words = {
-                    'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 
-                    'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 
-                    'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'his', 'her', 'its', 
-                    'their', 'he', 'she', 'it', 'they', 'him', 'them', 'this', 'that', 'these', 'those', 
-                    'when', 'where', 'why', 'how', 'what', 'who', 'which', 'whom', 'whose', 'if', 'because', 
-                    'while', 'during', 'before', 'after', 'above', 'below', 'up', 'down', 'out', 'off', 
-                    'over', 'under', 'again', 'further', 'then', 'once', 'one', 'two', 'three', 'as', 'from',
-                    'into', 'through', 'between', 'about', 'against', 'upon', 'within', 'without', 'around',
-                    'becomes', 'become', 'finds', 'find', 'gets', 'get', 'goes', 'go', 'comes', 'come',
-                    'takes', 'take', 'makes', 'make', 'gives', 'give', 'tries', 'try', 'tells', 'tell'
-                }
                 
                 if len(genre_text_clean.strip()) > 0:
                     try:
