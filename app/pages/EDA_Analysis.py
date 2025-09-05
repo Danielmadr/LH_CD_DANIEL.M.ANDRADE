@@ -300,7 +300,7 @@ def analise_overview_insights(df: pd.DataFrame):
         # Converter para minúsculo e remover pontuação
         text = re.sub(r'[^\w\s]', ' ', text.lower())
         # Remover palavras muito comuns (stop words básicas)
-        stop_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'his', 'her', 'its', 'their', 'he', 'she', 'it', 'they', 'him', 'them', 'this', 'that', 'these', 'those', 'when', 'where', 'why', 'how', 'what', 'who', 'which', 'whom', 'whose', 'if', 'because', 'while', 'during', 'before', 'after', 'above', 'below', 'up', 'down', 'out', 'off', 'over', 'under', 'again', 'further', 'then', 'once'}
+        stop_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'his', 'her', 'its', 'their', 'he', 'she', 'it', 'they', 'him', 'them', 'this', 'that', 'these', 'those', 'when', 'where', 'why', 'how', 'what', 'who', 'which', 'whom', 'whose', 'if', 'because', 'while', 'during', 'before', 'after', 'above', 'below', 'up', 'down', 'out', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'from'}
         
         words = text.split()
         # Filtrar palavras com mais de 2 caracteres que não são stop words
@@ -392,11 +392,11 @@ def analise_overview_insights(df: pd.DataFrame):
     display_genres = top_5_genres[:5]
     
     if len(display_genres) > 0:
-        # Criar colunas para exibir as nuvens lado a lado
-        cols = st.columns(len(display_genres))
+        # Criar tabs para cada gênero (similar ao gráfico de palavras-chave)
+        wordcloud_tabs = st.tabs([f"☁️ {genre}" for genre in display_genres])
         
         for i, genre in enumerate(display_genres):
-            with cols[i]:
+            with wordcloud_tabs[i]:
                 # Combinar todas as descrições do gênero
                 genre_overviews = df_overview[df_overview['Genero_Principal'] == genre]['Overview']
                 genre_text = ' '.join(genre_overviews.dropna().astype(str))
@@ -420,22 +420,34 @@ def analise_overview_insights(df: pd.DataFrame):
                 
                 if len(genre_text_clean.strip()) > 0:
                     try:
+                        # Mostrar estatísticas do gênero
+                        num_filmes = len(genre_overviews)
+                        avg_length = genre_overviews.str.len().mean()
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.metric("Filmes analisados", f"{num_filmes:,}")
+                        with col2:
+                            st.metric("Comprimento médio descrição", f"{avg_length:.0f} chars")
+                        
                         # Criar a nuvem de palavras
                         wordcloud = WordCloud(
-                            width=400, 
-                            height=300, 
+                            width=800, 
+                            height=500, 
                             background_color='white',
                             stopwords=stop_words,
-                            max_words=50,
+                            max_words=75,
                             colormap='viridis',
-                            min_font_size=10
+                            min_font_size=12,
+                            relative_scaling=0.5,
+                            max_font_size=100
                         ).generate(genre_text_clean)
                         
-                        # Criar figura matplotlib
-                        fig, ax = plt.subplots(figsize=(6, 4))
+                        # Criar figura matplotlib com tamanho maior
+                        fig, ax = plt.subplots(figsize=(12, 8))
                         ax.imshow(wordcloud, interpolation='bilinear')
                         ax.axis('off')
-                        ax.set_title(f'{genre}', fontsize=14, fontweight='bold', pad=20)
+                        ax.set_title(f'Nuvem de Palavras - {genre}', fontsize=16, fontweight='bold', pad=20)
                         
                         # Exibir no Streamlit
                         st.pyplot(fig, width='stretch')
