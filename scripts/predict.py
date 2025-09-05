@@ -77,10 +77,11 @@ class MoviePredictor:
         
         # Obter importâncias das features
         if hasattr(self.model_trainer.model, 'feature_importances_'):
+            X_row = X[self.model_trainer.feature_names].iloc[0]  # garante alinhamento
             feature_importance = pd.DataFrame({
                 'feature': self.model_trainer.feature_names,
                 'importance': self.model_trainer.model.feature_importances_,
-                'value': X.iloc[0].values
+                'value': X_row.values
             }).sort_values('importance', ascending=False)
             
             print(f"\nPredição: {prediction:.2f}")
