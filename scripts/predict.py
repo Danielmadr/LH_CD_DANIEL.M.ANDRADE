@@ -1,117 +1,45 @@
-"""
-Script para fazer predições usando o modelo e processor treinados.
-Demonstra como usar a nova estrutura separada.
-"""
-
-import argparse
 import pandas as pd
-from pathlib import Path
-from data_processor import DataProcessor
-from scripts.train_model import ModelTrainer
+import json
+import sys
+from preprocessing import basic_clean
+from utils import load_model
 
-class MoviePredictor:
-    """
-    Classe para fazer predições de rating IMDB.
-    """
-    
-    def __init__(self, model_path: str, processor_path: str):
-        """
-        Inicializa o preditor carregando modelo e processor.
-        """
-        self.model_trainer = ModelTrainer.load_model(model_path)
-        self.processor = DataProcessor.load(processor_path)
-        
-        print(f"Modelo carregado de: {model_path}")
-        print(f"Processor carregado de: {processor_path}")
-        print(f"Features do modelo: {len(self.model_trainer.feature_names)}")
-    
-    def predict_single(self, movie_data: dict) -> float:
-        """
-        Faz predição para um único filme.
-        
-        Args:
-            movie_data: Dicionário com dados do filme
-            
-        Returns:
-            Rating predito
-        """
-        # Converter para DataFrame
-        df = pd.DataFrame([movie_data])
-        
-        # Aplicar transformações
-        X = self.processor.transform(df)
-        
-        # Fazer predição
-        prediction = self.model_trainer.model.predict(X)[0]
-        
-        return prediction
-    
-    def predict_batch(self, df: pd.DataFrame) -> pd.Series:
-        """
-        Faz predições para múltiplos filmes.
-        
-        Args:
-            df: DataFrame com dados dos filmes
-            
-        Returns:
-            Series com predições
-        """
-        # Aplicar transformações
-        X = self.processor.transform(df)
-        
-        # Fazer predições
-        predictions = self.model_trainer.model.predict(X)
-        
-        return pd.Series(predictions, index=df.index)
-    
-    def explain_prediction(self, movie_data: dict, top_features: int = 5):
-        """
-        Explica uma predição mostrando as features mais importantes.
-        """
-        # Fazer predição
-        prediction = self.predict_single(movie_data)
-        
-        # Preparar dados transformados
-        df = pd.DataFrame([movie_data])
-        X = self.processor.transform(df)
-        
-        # Obter importâncias das features
-        if hasattr(self.model_trainer.model, 'feature_importances_'):
-            X_row = X[self.model_trainer.feature_names].iloc[0]  # garante alinhamento
-            feature_importance = pd.DataFrame({
-                'feature': self.model_trainer.feature_names,
-                'importance': self.model_trainer.model.feature_importances_,
-                'value': X_row.values
-            }).sort_values('importance', ascending=False)
-            
-            print(f"\nPredição: {prediction:.2f}")
-            print(f"\nTop {top_features} features mais importantes:")
-            print("-" * 50)
-            
-            for i, (_, row) in enumerate(feature_importance.head(top_features).iterrows()):
-                print(f"{i+1}. {row['feature']:<20}: {row['value']:<10.2f} (imp: {row['importance']:.4f})")
-        
-        return prediction
+def predict(model_path, input_json, reference_csv="data/raw/desafio_indicium_imdb.csv"):
+    # Carregar modelo
+    model = load_model(model_path)
 
-def demo_prediction():
-    """
-    Demonstração de como usar o preditor.
-    """
-    # Caminhos dos arquivos
-    model_path = "models/rf_model.pkl"
-    processor_path = "models/data_processor.pkl"
-    
-    # Verificar se arquivos existem
-    if not Path(model_path).exists() or not Path(processor_path).exists():
-        print("Erro: Modelo ou processor não encontrados.")
-        print("Execute primeiro o treinamento com train_model_v2.py")
-        return
-    
-    # Inicializar preditor
-    predictor = MoviePredictor(model_path, processor_path)
-    
-    # Dados de teste - The Shawshank Redemption
-    test_movie = {
+    # Carregar JSON como DataFrame
+    if isinstance(input_json, str):
+        input_data = json.loads(input_json)
+    else:
+        input_data = input_json
+
+    df_input = pd.DataFrame([input_data])
+
+    # 🔹 Carregar dataset de treino (para alinhar colunas)
+    df_ref = pd.read_csv(reference_csv)
+    df_ref = basic_clean(df_ref)
+    train_cols = df_ref.drop(columns=["IMDB_Rating"]).columns
+
+    # 🔹 Pré-processar entrada
+    df_input_clean = basic_clean(df_input)
+
+    # Garantir mesmas colunas que treino
+    missing_cols = [col for col in train_cols if col not in df_input_clean.columns]
+    if missing_cols:
+        df_missing = pd.DataFrame(0, index=df_input_clean.index, columns=missing_cols)
+        df_input_clean = pd.concat([df_input_clean, df_missing], axis=1)
+
+    df_input_clean = df_input_clean[train_cols]
+
+    # Fazer predição
+    pred = model.predict(df_input_clean.astype("float32"))[0]
+    return pred
+
+
+if __name__ == "__main__":
+    # Exemplo: python scripts/predict.py models/xgb_model.pkl
+    shawshank = {
         'Series_Title': 'The Shawshank Redemption',
         'Released_Year': 1994,
         'Certificate': 'A',
@@ -127,32 +55,11 @@ def demo_prediction():
         'No_of_Votes': 2343110,
         'Gross': '28341469'
     }
-    
-    print("="*60)
-    print("DEMONSTRAÇÃO DE PREDIÇÃO")
-    print("="*60)
-    
-    print(f"Filme: {test_movie['Series_Title']}")
-    print(f"Ano: {test_movie['Released_Year']}")
-    print(f"Gênero: {test_movie['Genre']}")
-    
-    # Fazer predição com explicação
-    prediction = predictor.explain_prediction(test_movie, top_features=8)
-    
-    print(f"\nRating IMDB real: 9.3")
-    print(f"Rating predito: {prediction:.2f}")
-    print(f"Diferença: {abs(9.3 - prediction):.2f}")
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Faz predições usando modelo treinado")
-    parser.add_argument("--demo", action="store_true", help="Executa demonstração")
-    parser.add_argument("--model", default="models/rf_model.pkl", help="Caminho do modelo")
-    parser.add_argument("--processor", default="models/data_processor.pkl", help="Caminho do processor")
-    
-    args = parser.parse_args()
-    
-    if args.demo:
-        demo_prediction()
-    else:
-        print("Use --demo para executar demonstração")
-        print("Ou importe MoviePredictor para usar em seu código")
+    if len(sys.argv) < 2:
+        print("⚠️ Uso: python scripts/predict.py <caminho_modelo.pkl>")
+        sys.exit(1)
+
+    model_path = sys.argv[1]
+    pred = predict(model_path, shawshank)
+    print(f"🎬 Predição para Shawshank: {pred:.2f}")
