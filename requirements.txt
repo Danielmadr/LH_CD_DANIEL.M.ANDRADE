@@ -1,0 +1,21 @@
+# Core data science libraries
+pandas==2.3.2
+numpy==2.3.2
+scikit-learn==1.7.1
+
+# Machine learning models
+xgboost==3.0.5
+
+# Hyperparameter optimization
+optuna==4.5.0
+
+# Streamlit app
+streamlit==1.49.1
+
+# Visualization
+plotly==6.3.0
+matplotlib==3.10.6
+wordcloud==1.9.4
+
+# Database
+SQLAlchemy==2.0.43
