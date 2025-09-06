@@ -1,10 +1,19 @@
 import pandas as pd
 import json
 import sys
-from preprocessing import basic_clean
-from utils import load_model
+from pathlib import Path
 
-def predict(model_path, input_json, reference_csv="data/raw/desafio_indicium_imdb.csv"):
+# Adicionar pasta raiz ao path para importar config
+root_dir = Path(__file__).parent.parent
+sys.path.append(str(root_dir))
+
+from config import RAW_DATA_PATH
+from scripts.preprocessing import basic_clean
+from scripts.utils import load_model
+
+def predict(model_path, input_json, reference_csv=None):
+    if reference_csv is None:
+        reference_csv = str(RAW_DATA_PATH)
     # Carregar modelo
     model = load_model(model_path)
 

@@ -1,8 +1,16 @@
 import numpy as np
 import optuna
+import sys
+from pathlib import Path
 from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error
 from xgboost import XGBRegressor
+
+# Adicionar pasta raiz ao path para importar config
+root_dir = Path(__file__).parent.parent
+sys.path.append(str(root_dir))
+
+from config import RANDOM_STATE
 
 # ========================
 # 🎯 Objetivo para Optuna
@@ -20,10 +28,10 @@ def objective(trial, X, y):
         "tree_method": "hist",
         "objective": "reg:squarederror",
         "n_jobs": -1,
-        "random_state": 42,
+        "random_state": RANDOM_STATE,
     }
 
-    kf = KFold(n_splits=5, shuffle=True, random_state=42)
+    kf = KFold(n_splits=5, shuffle=True, random_state=RANDOM_STATE)
     rmses = []
 
     for train_idx, valid_idx in kf.split(X):
@@ -90,10 +98,10 @@ def run_optuna_two_phase(X, y, n_trials_phase1=80, n_trials_phase2=10):
             "tree_method": "hist",
             "objective": "reg:squarederror",
             "n_jobs": -1,
-            "random_state": 42,
+            "random_state": RANDOM_STATE,
         }
 
-        kf = KFold(n_splits=5, shuffle=True, random_state=42)
+        kf = KFold(n_splits=5, shuffle=True, random_state=RANDOM_STATE)
         rmses = []
 
         for train_idx, valid_idx in kf.split(X):

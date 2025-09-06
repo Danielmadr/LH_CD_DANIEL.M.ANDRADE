@@ -1,9 +1,16 @@
 
 import argparse
 import sqlite3
+import sys
 from pathlib import Path
 import pandas as pd
-from preprocess import preprocess_movies_df
+
+# Adicionar pasta raiz ao path para importar config
+root_dir = Path(__file__).parent.parent
+sys.path.append(str(root_dir))
+
+from config import DATABASE_PATH, RAW_DATA_PATH
+from scripts.preprocess import preprocess_movies_df
 
 # Nome da tabela que será criada/populada no banco SQLite
 TABLE_NAME = "movies"
@@ -50,27 +57,32 @@ def insert_dataframe(conn: sqlite3.Connection, df: pd.DataFrame):
   df.to_sql(TABLE_NAME, conn, if_exists="append", index=False)
 
 
-def main(csv_path: str, out_dir: str):
-  out_dir = Path(out_dir)
-  out_dir.mkdir(parents=True, exist_ok=True)
-  df_raw = pd.read_csv(csv_path, sep=",", quotechar='"', encoding="utf-8", low_memory=False)
-  # Aplicar preprocessamento
-  df = preprocess_movies_df(df_raw)
+def main(csv_path=None, out_dir=None):
+    if csv_path is None:
+        csv_path = str(RAW_DATA_PATH)
+    if out_dir is None:
+        out_dir = DATABASE_PATH.parent
+    
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    df_raw = pd.read_csv(csv_path, sep=",", quotechar='"', encoding="utf-8", low_memory=False)
+    # Aplicar preprocessamento
+    df = preprocess_movies_df(df_raw)
 
-  prod_path = out_dir / "production.db"
-  if prod_path.exists():
-    prod_path.unlink()
-  conn = sqlite3.connect(str(prod_path))
-  try:
-    create_table(conn)
-    insert_dataframe(conn, df)  # Inserir dados já preprocessados
-  finally:
-    conn.close()
-  print("Bancos criados em:", out_dir)
+    prod_path = out_dir / "production.db"
+    if prod_path.exists():
+        prod_path.unlink()
+    conn = sqlite3.connect(str(prod_path))
+    try:
+        create_table(conn)
+        insert_dataframe(conn, df)  # Inserir dados já preprocessados
+    finally:
+        conn.close()
+    print("Bancos criados em:", out_dir)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--csv", required=True, help="Caminho para o CSV bruto.")
-    parser.add_argument("--out-dir", default="data", help="Diretório de saída para os .db")
+    parser.add_argument("--csv", help=f"Caminho para o CSV bruto. Padrão: {RAW_DATA_PATH}")
+    parser.add_argument("--out-dir", help=f"Diretório de saída para os .db. Padrão: {DATABASE_PATH.parent}")
     args = parser.parse_args()
     main(args.csv, args.out_dir)

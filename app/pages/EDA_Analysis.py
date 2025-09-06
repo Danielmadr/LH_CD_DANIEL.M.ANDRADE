@@ -4,9 +4,17 @@ import pandas as pd
 import sqlite3
 import plotly.express as px
 import re
+import sys
+from pathlib import Path
 from collections import Counter
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+
+# Adicionar pasta raiz ao path para importar config
+root_dir = Path(__file__).parent.parent.parent
+sys.path.append(str(root_dir))
+
+from config import DATABASE_PATH
 
 
 def carregar_dados_db(db_path):
@@ -460,7 +468,7 @@ def analise_overview_insights(df: pd.DataFrame):
 def page_analysis():
     st.title("Análise Exploratória de Dados (EDA)")
     
-    db_path = "data/production.db"
+    db_path = str(DATABASE_PATH)
     try:
         df = carregar_dados_db(db_path)
     except Exception as e:

@@ -5,214 +5,24 @@ import sys
 import os
 import numpy as np
 from pathlib import Path
-from datetime import datetime
 
 # Adicionar o diretório raiz ao path para importar os módulos
 root_dir = Path(__file__).parent.parent.parent
 sys.path.append(str(root_dir))
 
 from scripts.utils import load_model
-
-def preprocess_movies_df(df: pd.DataFrame) -> pd.DataFrame:
-    """Função de pré-processamento básico dos dados do filme."""
-    df = df.copy()
-    
-    # 1. Series_Title: remover espaços extras
-    if 'Series_Title' in df.columns:
-        df['Series_Title'] = df['Series_Title'].astype(str).str.strip()
-
-    # 2. Released_Year: converter para inteiro, tratar ausentes
-    if 'Released_Year' in df.columns:
-        df['Released_Year'] = pd.to_numeric(df['Released_Year'], errors='coerce').astype('Int64')
-
-    # 3. Certificate: padronizar valores, preencher ausentes
-    if 'Certificate' in df.columns:
-        df['Certificate'] = df['Certificate'].fillna('Unknown').astype(str).str.strip()
-
-    # 4. Runtime: extrair minutos, converter para inteiro
-    if 'Runtime' in df.columns:
-        df['Runtime'] = df['Runtime'].astype(str).str.extract(r'(\d+)').astype(float)
-
-    # 5. Genre: remover espaços extras após vírgula
-    if 'Genre' in df.columns:
-        df['Genre'] = df['Genre'].astype(str).str.replace(', ', ',', regex=False)
-
-    # 6. IMDB_Rating: converter para float
-    if 'IMDB_Rating' in df.columns:
-        df['IMDB_Rating'] = pd.to_numeric(df['IMDB_Rating'], errors='coerce')
-
-    # 7. Overview: remover quebras de linha e espaços extras
-    if 'Overview' in df.columns:
-        df['Overview'] = df['Overview'].astype(str).str.replace('\n', ' ', regex=False).str.strip()
-
-    # 8. Meta_score: converter para float
-    if 'Meta_score' in df.columns:
-        df['Meta_score'] = pd.to_numeric(df['Meta_score'], errors='coerce')
-
-    # 9. Director: remover espaços extras
-    if 'Director' in df.columns:
-        df['Director'] = df['Director'].astype(str).str.strip()
-
-    # 10-13. Star1-4: remover espaços extras
-    for star in ['Star1', 'Star2', 'Star3', 'Star4']:
-        if star in df.columns:
-            df[star] = df[star].astype(str).str.strip()
-
-    # 14. No_of_Votes: remover vírgulas, converter para inteiro
-    if 'No_of_Votes' in df.columns:
-        df['No_of_Votes'] = (
-            df['No_of_Votes']
-            .astype(str)
-            .str.replace(',', '', regex=False)
-        )
-        df['No_of_Votes'] = pd.to_numeric(df['No_of_Votes'], errors='coerce').astype('Int64')
-
-    # 15. Gross: remover vírgulas, converter para float
-    if 'Gross' in df.columns:
-        df['Gross'] = (
-            df['Gross']
-            .astype(str)
-            .str.replace(',', '', regex=False)
-        )
-        df['Gross'] = pd.to_numeric(df['Gross'], errors='coerce')
-
-    # Remover duplicatas
-    df = df.drop_duplicates()
-
-    # Padronizar valores ausentes para None
-    df = df.replace({np.nan: None})
-
-    return df
-
-def basic_clean(df):
-    """Função de limpeza e feature engineering dos dados."""
-    COLS_TO_DROP = ["id", "Series_Title", "Unnamed: 0"]
-
-    df = df.copy()
-    df.columns = [c.strip() for c in df.columns]
-
-    for col in COLS_TO_DROP:
-        if col in df.columns:
-            df.drop(columns=col, inplace=True)
-
-    df = df.dropna()
-    df = preprocess_movies_df(df)
-
-    # Features derivadas
-    if 'Released_Year' in df.columns:
-        current_year = datetime.now().year
-        # Convert to numeric first to avoid object dtype fillna warning
-        df['Released_Year'] = pd.to_numeric(df['Released_Year'], errors='coerce')
-        df['Released_Year'] = df['Released_Year'].fillna(df['Released_Year'].median())
-        df['Movie_Age'] = current_year - df['Released_Year']
-        df['Is_Recent'] = (df['Movie_Age'] <= 5).astype(int)
-        df['Is_Classic'] = (df['Movie_Age'] >= 30).astype(int)
-
-    if 'No_of_Votes' in df.columns:
-        df['Log_Votes'] = np.log1p(df['No_of_Votes'].fillna(0))
-        df['High_Votes'] = (df['No_of_Votes'] > df['No_of_Votes'].quantile(0.75)).astype(int)
-
-    if 'Gross' in df.columns:
-        filled_gross = pd.to_numeric(df['Gross'], errors="coerce").fillna(0)
-        df['Log_Gross'] = np.log1p(filled_gross)
-        df['Has_Gross'] = df['Gross'].notna().astype(int)
-        df['Gross'] = filled_gross
-
-    if 'Meta_score' in df.columns:
-        df['Has_Meta_Score'] = df['Meta_score'].notna().astype(int)
-        filled_meta_score = pd.to_numeric(df['Meta_score'], errors="coerce")
-        meta_median = filled_meta_score.median()
-        df['Meta_score'] = filled_meta_score.fillna(meta_median)
-
-    if 'Runtime' in df.columns:
-        filled_runtime = pd.to_numeric(df['Runtime'], errors="coerce")
-        runtime_median = filled_runtime.median()
-        df['Runtime_filled'] = filled_runtime.fillna(runtime_median)
-        df['Is_Long_Movie'] = (df['Runtime_filled'] > 120).astype(int)
-        df['Is_Short_Movie'] = (df['Runtime_filled'] < 90).astype(int)
-        df['Runtime'] = filled_runtime.fillna(runtime_median)
-
-    if "Genre" in df.columns:
-        df['Genre'] = df['Genre'].fillna('Unknown')
-        df["Main_Genre"] = df["Genre"].astype(str).str.split(",").str[0]
-        genre_dummies = pd.get_dummies(df["Genre"].astype(str), prefix="Genre")
-        df = pd.concat([df, genre_dummies], axis=1)
-
-    for col in ["Director", "Star1", "Star2", "Star3", "Star4"]:
-        if col in df.columns:
-            df[col] = df[col].fillna('Unknown')
-            freq = df[col].value_counts()
-            df[f"{col}_Freq"] = df[col].map(freq).fillna(0)
-
-    if "Released_Year" in df.columns:
-        df["Decade"] = (df["Released_Year"] // 10) * 10
-
-    for col in ["Certificate", "Overview", "Genre", "Director", "Star1", "Star2", "Star3", "Star4"]:
-        if col in df.columns:
-            df.drop(columns=col, inplace=True)
-
-    for col in df.columns:
-        if col != 'IMDB_Rating' and df[col].dtype == 'object':
-            df[col] = pd.to_numeric(df[col], errors='coerce')
-
-    if 'IMDB_Rating' in df.columns:
-        df = df.dropna(subset=['IMDB_Rating'])
-
-    df = df.fillna(0)
-    df = df.infer_objects(copy=False)
-    return df
+from scripts.preprocessing import basic_clean
+from config import MODEL_PATHS, MODEL_METRICS, MODEL_TOP_FEATURES, RAW_DATA_PATH
 
 # Informações dos modelos
-MODEL_INFO = {
-    "RandomForest": {
-        "path": "models/rf_model.pkl",
-        "description": "📊 RandomForest - Avaliação",
-        "metrics": {
-            "RMSE": 0.1937,
-            "MAE": 0.1534,
-            "R²": 0.5536
-        },
-        "top_features": [
-            "Log_Votes: 0.2643",
-            "No_of_Votes: 0.2539", 
-            "Meta_score: 0.0933",
-            "Released_Year: 0.0612",
-            "Movie_Age: 0.0610"
-        ]
-    },
-    "XGBoost": {
-        "path": "models/xgb_model.pkl",
-        "description": "📊 XGBoost - Avaliação",
-        "metrics": {
-            "RMSE": 0.1802,
-            "MAE": 0.1453,
-            "R²": 0.6136
-        },
-        "top_features": [
-            "Genre_Drama,Horror,Mystery: 0.1110",
-            "No_of_Votes: 0.0838",
-            "Genre_Drama,Thriller,War: 0.0727",
-            "Genre_Action,Sci-Fi,Thriller: 0.0641",
-            "Genre_Action,Sci-Fi: 0.0613"
-        ]
-    },
-    "XGBoost (Optuna)": {
-        "path": "models/xgb_optuna_model.pkl",
-        "description": "📊 XGBoost (Optuna) - Avaliação",
-        "metrics": {
-            "RMSE": 0.0883,
-            "MAE": 0.0697,
-            "R²": 0.9073
-        },
-        "top_features": [
-            "High_Votes: 0.2094",
-            "No_of_Votes: 0.0708",
-            "Log_Votes: 0.0546",
-            "Decade: 0.0535",
-            "Is_Classic: 0.0487"
-        ]
+MODEL_INFO = {}
+for model_name in MODEL_PATHS.keys():
+    MODEL_INFO[model_name] = {
+        "path": str(MODEL_PATHS[model_name]),
+        "description": f"📊 {model_name} - Avaliação",
+        "metrics": MODEL_METRICS[model_name],
+        "top_features": MODEL_TOP_FEATURES[model_name]
     }
-}
 
 def check_model_availability():
     """Verifica quais modelos estão disponíveis."""

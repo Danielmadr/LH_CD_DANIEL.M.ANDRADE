@@ -1,11 +1,20 @@
 import pandas as pd
 import numpy as np
-from datetime import datetime
-from preprocess import preprocess_movies_df
+import sys
+from pathlib import Path
+
+# Adicionar pasta raiz ao path para importar config
+root_dir = Path(__file__).parent.parent
+sys.path.append(str(root_dir))
+
+from config import (
+    CURRENT_YEAR, COLS_TO_DROP, RECENT_MOVIE_THRESHOLD, 
+    CLASSIC_MOVIE_THRESHOLD, LONG_MOVIE_THRESHOLD, SHORT_MOVIE_THRESHOLD
+)
+from scripts.preprocess import preprocess_movies_df
 
 def basic_clean(df):
-    COLS_TO_DROP = ["id", "Series_Title", "Unnamed: 0"]
-
+    """Função de limpeza e feature engineering dos dados."""
     df = df.copy()
     df.columns = [c.strip() for c in df.columns]
 
@@ -18,13 +27,12 @@ def basic_clean(df):
 
     # Features derivadas
     if 'Released_Year' in df.columns:
-        current_year = datetime.now().year
         # Convert to numeric first to avoid object dtype fillna warning
         df['Released_Year'] = pd.to_numeric(df['Released_Year'], errors='coerce')
         df['Released_Year'] = df['Released_Year'].fillna(df['Released_Year'].median())
-        df['Movie_Age'] = current_year - df['Released_Year']
-        df['Is_Recent'] = (df['Movie_Age'] <= 5).astype(int)
-        df['Is_Classic'] = (df['Movie_Age'] >= 30).astype(int)
+        df['Movie_Age'] = CURRENT_YEAR - df['Released_Year']
+        df['Is_Recent'] = (df['Movie_Age'] <= RECENT_MOVIE_THRESHOLD).astype(int)
+        df['Is_Classic'] = (df['Movie_Age'] >= CLASSIC_MOVIE_THRESHOLD).astype(int)
 
     if 'No_of_Votes' in df.columns:
         df['Log_Votes'] = np.log1p(df['No_of_Votes'].fillna(0))
@@ -46,8 +54,8 @@ def basic_clean(df):
         filled_runtime = pd.to_numeric(df['Runtime'], errors="coerce")
         runtime_median = filled_runtime.median()
         df['Runtime_filled'] = filled_runtime.fillna(runtime_median)
-        df['Is_Long_Movie'] = (df['Runtime_filled'] > 120).astype(int)
-        df['Is_Short_Movie'] = (df['Runtime_filled'] < 90).astype(int)
+        df['Is_Long_Movie'] = (df['Runtime_filled'] > LONG_MOVIE_THRESHOLD).astype(int)
+        df['Is_Short_Movie'] = (df['Runtime_filled'] < SHORT_MOVIE_THRESHOLD).astype(int)
         df['Runtime'] = filled_runtime.fillna(runtime_median)
 
     if "Genre" in df.columns:
