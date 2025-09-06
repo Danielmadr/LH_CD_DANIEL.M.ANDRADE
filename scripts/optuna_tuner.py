@@ -46,7 +46,7 @@ def objective(trial, X, y):
 # ========================
 # 🔎 Otimização em 2 fases
 # ========================
-def run_optuna_two_phase(X, y, n_trials_phase1=80, n_trials_phase2=50):
+def run_optuna_two_phase(X, y, n_trials_phase1=80, n_trials_phase2=10):
     print("\n🔎 Fase 1: Busca ampla")
     study1 = optuna.create_study(direction="minimize", pruner=optuna.pruners.MedianPruner())
     study1.optimize(lambda t: objective(t, X, y), n_trials=n_trials_phase1)

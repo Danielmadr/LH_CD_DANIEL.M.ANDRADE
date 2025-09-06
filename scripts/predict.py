@@ -53,7 +53,7 @@ if __name__ == "__main__":
         'Star3': 'Bob Gunton',
         'Star4': 'William Sadler',
         'No_of_Votes': 2343110,
-        'Gross': '28341469'
+        'Gross': '28,341,469'
     }
 
     if len(sys.argv) < 2:
