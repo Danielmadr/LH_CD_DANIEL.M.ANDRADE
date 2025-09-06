@@ -11,7 +11,7 @@ from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 
 # Adicionar pasta raiz ao path para importar config
-root_dir = Path(__file__).parent.parent.parent
+root_dir = Path(__file__).parent.parent
 sys.path.append(str(root_dir))
 
 from config import DATABASE_PATH
@@ -466,13 +466,17 @@ def analise_overview_insights(df: pd.DataFrame):
     return df_overview
 
 def page_analysis():
-    st.title("Análise Exploratória de Dados (EDA)")
+    """Página de análise exploratória de dados."""
+    # Garantir que não há conflitos com a sidebar principal
+    st.title("📊 Análise Exploratória de Dados (EDA)")
+    st.markdown("Explore os dados dos filmes através de análises detalhadas e visualizações interativas.")
     
     db_path = str(DATABASE_PATH)
     try:
         df = carregar_dados_db(db_path)
+        st.success(f"✅ Dados carregados com sucesso! {len(df):,} filmes encontrados.")
     except Exception as e:
-        st.error(f"Erro ao carregar dados do banco: {e}")
+        st.error(f"❌ Erro ao carregar dados do banco: {e}")
         return
 
     tab1, tab2, tab3, tab4 = st.tabs(["🔗 Correlações Gerais", "🏆 Recomendações", "🎯 Análise de Faturamento", "📊 Análise das Visões Gerais dos Filmes"])
@@ -491,7 +495,6 @@ def page_analysis():
         st.subheader("Análise de Faturamento")
         st.markdown("Nesta seção, vamos explorar os fatores que influenciam o faturamento dos filmes.")
         analise_fatores_faturamento(df)
-
 
     with tab4:
         st.subheader("Análise das Visões Gerais dos Filmes")

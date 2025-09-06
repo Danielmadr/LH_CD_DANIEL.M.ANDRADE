@@ -7,12 +7,12 @@ import numpy as np
 from pathlib import Path
 
 # Adicionar o diretório raiz ao path para importar os módulos
-root_dir = Path(__file__).parent.parent.parent
+root_dir = Path(__file__).parent.parent
 sys.path.append(str(root_dir))
 
 from scripts.utils import load_model
 from scripts.preprocessing import basic_clean
-from config import MODEL_PATHS, MODEL_METRICS, MODEL_TOP_FEATURES, RAW_DATA_PATH
+from config import MODEL_PATHS, MODEL_METRICS, MODEL_TOP_FEATURES
 
 # Informações dos modelos
 MODEL_INFO = {}
@@ -93,7 +93,7 @@ def display_model_info(model_name, model_info):
 def page_prediction():
     """Página principal de predição."""
     st.title("🎬 Predição de Notas IMDB")
-    st.write("Utilize os modelos treinados para prever a nota IMDB de um filme.")
+    st.markdown("Utilize os modelos treinados para prever a nota IMDB de um filme com base nas suas características.")
     
     # Verificar modelos disponíveis
     available_models = check_model_availability()
@@ -102,11 +102,14 @@ def page_prediction():
         st.error("❌ Nenhum modelo encontrado! Verifique se os modelos estão na pasta 'models/'.")
         return
     
+    st.success(f"✅ {len(available_models)} modelo(s) disponível(is) para predição.")
+    
     # Seleção do modelo
     st.subheader("🤖 Seleção do Modelo")
     selected_model = st.selectbox(
         "Escolha o modelo para predição:",
-        list(available_models.keys())
+        list(available_models.keys()),
+        key="model_selection"
     )
     
     # Exibir informações do modelo selecionado
