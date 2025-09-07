@@ -20,9 +20,9 @@ RAW_DATA_PATH = DATA_DIR / "raw" / "desafio_indicium_imdb.csv"
 
 # Modelos
 MODEL_PATHS = {
-    "RandomForest": MODELS_DIR / "rf_model.pkl",
-    "XGBoost": MODELS_DIR / "xgb_model.pkl", 
-    "XGBoost (Optuna)": MODELS_DIR / "xgb_optuna_model.pkl"
+    "RandomForest": MODELS_DIR / "rf_model_v1.pkl",
+    "XGBoost": MODELS_DIR / "xgb_model_v1.pkl",
+    "XGBoost (Optuna)": MODELS_DIR / "xgb_optuna_model_v1.pkl"
 }
 
 # Configurações de treino
