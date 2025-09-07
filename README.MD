@@ -1,5 +1,18 @@
 # 🎬 Projeto de Predição de Notas IMDB
 
+<div align="center">
+  <p><em>Aplicação de Machine Learning para predição de notas IMDB de filmes</em></p>
+  
+  [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+  [![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io/)
+  [![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)](https://pandas.pydata.org/)
+  [![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
+  [![XGBoost](https://img.shields.io/badge/XGBoost-FF6600?style=for-the-badge&logo=xgboost&logoColor=white)](https://xgboost.readthedocs.io/)
+  [![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+  [![Plotly](https://img.shields.io/badge/Plotly-239120?style=for-the-badge&logo=plotly&logoColor=white)](https://plotly.com/)
+  [![Optuna](https://img.shields.io/badge/Optuna-3776AB?style=for-the-badge&logo=optuna&logoColor=white)](https://optuna.org/)
+</div>
+
 Este projeto é uma aplicação de Machine Learning para predição de notas IMDB de filmes, desenvolvida com **Streamlit** e incluindo análise exploratória de dados (EDA) e três modelos de ML treinados.
 
 ![Tela Principal da Aplicação](screenshots/main_page.png)
