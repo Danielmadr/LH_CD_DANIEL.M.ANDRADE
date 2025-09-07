@@ -2,8 +2,7 @@
 
 Este projeto é uma aplicação de Machine Learning para predição de notas IMDB de filmes, desenvolvida com **Streamlit** e incluindo análise exploratória de dados (EDA) e três modelos de ML treinados.
 
-![Tela Principal da Aplicação](docs/screenshots/main_page.png)
-_[Placeholder: Screenshot da página principal da aplicação]_
+![Tela Principal da Aplicação](screenshots/main_page.png)
 
 ## 🚀 Funcionalidades
 
@@ -15,8 +14,7 @@ _[Placeholder: Screenshot da página principal da aplicação]_
 - Distribuições de variáveis importantes
 - Insights sobre o dataset IMDB
 
-![Página de EDA](docs/screenshots/eda_page.png)
-_[Placeholder: Screenshot da página de análise EDA]_
+![Página de EDA](screenshots/eda_page.png)
 
 ### 🤖 Predição de Notas IMDB
 
@@ -31,8 +29,7 @@ _[Placeholder: Screenshot da página de análise EDA]_
 - **Features importantes** de cada modelo
 - **Interpretação automática** das predições
 
-![Página de Predição](docs/screenshots/prediction_page.png)
-_[Placeholder: Screenshot da página de predição]_
+![Página de Predição](screenshots/prediction_page.png)
 
 ### 🗄️ Banco de Dados SQLite
 
@@ -42,8 +39,40 @@ _[Placeholder: Screenshot da página de predição]_
 
 ## 📈 Performance dos Modelos
 
-![Comparação de Modelos](docs/screenshots/model_comparison.png)
-_[Placeholder: Gráfico comparativo da performance dos modelos]_
+### 📈 Comparação de Modelos
+
+```mermaid
+bar
+    title: Comparação de Métricas (quanto menor RMSE/MAE, melhor; quanto maior R², melhor)
+    orientation: horizontal
+    x-axis: Valor
+    y-axis: Modelo
+    series:
+      - title: RMSE
+        data:
+          - x: 0.1937
+            y: RandomForest
+          - x: 0.1802
+            y: XGBoost
+          - x: 0.0883
+            y: XGBoost (Optuna)
+      - title: MAE
+        data:
+          - x: 0.1534
+            y: RandomForest
+          - x: 0.1453
+            y: XGBoost
+          - x: 0.0697
+            y: XGBoost (Optuna)
+      - title: R²
+        data:
+          - x: 0.5536
+            y: RandomForest
+          - x: 0.6136
+            y: XGBoost
+          - x: 0.9073
+            y: XGBoost (Optuna)
+```
 
 ## 🛠️ Instalação e Execução
 
@@ -87,9 +116,6 @@ streamlit run app/main.py
 
 A aplicação estará disponível em: `http://localhost:8501`
 
-![Aplicação Rodando](docs/screenshots/app_running.png)
-_[Placeholder: Screenshot da aplicação rodando no navegador]_
-
 ### Inicializando o Banco de Dados (Opcional)
 
 Se desejar recriar o banco de dados:
@@ -103,22 +129,19 @@ python scripts/init_db.py --csv data/raw/desafio_indicium_imdb.csv --db data/pro
 ```
 ├── app/
 │   ├── main.py                 # Aplicação principal Streamlit
-│   └── pages/
-│       ├── EDA_Analysis.py     # Página de análise exploratória
-│       └── Prediction.py       # Página de predição
+│   ├── EDA_Analysis.py     # Página de análise exploratória
+│   └── Prediction.py       # Página de predição
 ├── data/
 │   ├── production.db           # Banco de dados SQLite
 │   └── raw/
 │       └── desafio_indicium_imdb.csv  # Dataset original
 ├── docs/
-│   ├── refatoracao_ml_pipeline.md      # Documentação do pipeline
-│   ├── relatorio_analise_estatistica.md # Relatório estatístico
-│   ├── relatorio_engenharia_features.md # Documentação de features
-│   └── screenshots/            # Screenshots da aplicação (placeholders)
+│   └── Relatório de análises estatísticas e EDA # Relatório EDA
 ├── models/
-│   ├── rf_model.pkl           # Modelo RandomForest treinado
-│   ├── xgb_model.pkl          # Modelo XGBoost treinado
-│   └── xgb_optuna_model.pkl   # Modelo XGBoost otimizado
+│   ├── rf_model_v1.pkl           # Modelo RandomForest treinado
+│   ├── xgb_model_v1.pkl          # Modelo XGBoost treinado
+│   └── xgb_optuna_model_v1.pkl   # Modelo XGBoost otimizado
+|── screenshots/            # Screenshots da aplicação
 ├── scripts/
 │   ├── train_rf.py            # Script treinamento RandomForest
 │   ├── train_xgb.py           # Script treinamento XGBoost
@@ -130,15 +153,15 @@ python scripts/init_db.py --csv data/raw/desafio_indicium_imdb.csv --db data/pro
 │   ├── preprocessing.py       # Feature engineering avançado
 │   ├── init_db.py             # Inicialização do banco SQLite
 │   └── utils.py               # Funções utilitárias
-├── temp/                      # Arquivos temporários e testes
+|── config.py                  # Configuraçoes globais        
 ├── test_model.ipynb          # Notebook de experimentação
+├── requirements              # Bibliotecas requisitos do projeto
 └── README.MD                 # Este arquivo
 ```
 
 ## 🎯 Como Usar a Predição
 
-![Formulário de Predição](docs/screenshots/prediction_form.png)
-_[Placeholder: Screenshot do formulário de predição preenchido]_
+![Formulário de Predição](screenshots/prediction_form.png)
 
 ### Via Formulário
 
@@ -156,8 +179,7 @@ _[Placeholder: Screenshot do formulário de predição preenchido]_
    - **Sinopse**
 4. Clique em "Prever Nota IMDB"
 
-![Resultado da Predição](docs/screenshots/prediction_result.png)
-_[Placeholder: Screenshot do resultado da predição com interpretação]_
+![Resultado da Predição](screenshots/prediction_result.png)
 
 ### Via JSON
 
@@ -165,8 +187,7 @@ _[Placeholder: Screenshot do resultado da predição com interpretação]_
 2. Use o exemplo fornecido ou cole seu próprio JSON
 3. Clique em "Prever via JSON"
 
-![Predição via JSON](docs/screenshots/json_prediction.png)
-_[Placeholder: Screenshot da predição via JSON]_
+![Predição via JSON](screenshots/json_prediction.png)
 
 **Exemplo de JSON:**
 
