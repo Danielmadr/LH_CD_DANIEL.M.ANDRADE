@@ -1,25 +1,23 @@
-
 import argparse
 import sqlite3
 import sys
 from pathlib import Path
 import pandas as pd
 
-# Adicionar pasta raiz ao path para importar config
 root_dir = Path(__file__).parent.parent
 sys.path.append(str(root_dir))
 
 from config import DATABASE_PATH, RAW_DATA_PATH
 from scripts.preprocess import preprocess_movies_df
 
-# Nome da tabela que será criada/populada no banco SQLite
 TABLE_NAME = "movies"
 
+
 def create_table(conn: sqlite3.Connection):
-    """Cria (se não existir) a tabela principal para armazenar filmes.
-    """
+    """Cria (se não existir) a tabela principal para armazenar filmes."""
     cur = conn.cursor()
-    cur.execute(f"""
+    cur.execute(
+        f"""
         CREATE TABLE IF NOT EXISTS {TABLE_NAME} (
             id INTEGER PRIMARY KEY AUTOINCREMENT,  -- identificador único gerado automaticamente
             Series_Title TEXT,                     -- título da obra
@@ -38,23 +36,35 @@ def create_table(conn: sqlite3.Connection):
             No_of_Votes REAL,                      -- número de votos do IMDb
             Gross REAL                             -- Faturamento
         );
-    """)
-    conn.commit() 
+    """
+    )
+    conn.commit()
+
 
 def insert_dataframe(conn: sqlite3.Connection, df: pd.DataFrame):
-  # Lista de colunas esperadas na tabela.
-  expected_cols = [
-    "Series_Title","Released_Year","Certificate","Runtime","Genre",
-    "IMDB_Rating","Overview","Meta_score","Director","Star1",
-    "Star2","Star3","Star4","No_of_Votes","Gross"
-  ]
-  df = df.copy()
-  # Para cada coluna esperada que não exista no CSV, cria uma coluna vazia (None)
-  for c in expected_cols:
-    if c not in df.columns:
-      df[c] = None
-  df = df[expected_cols]
-  df.to_sql(TABLE_NAME, conn, if_exists="append", index=False)
+    expected_cols = [
+        "Series_Title",
+        "Released_Year",
+        "Certificate",
+        "Runtime",
+        "Genre",
+        "IMDB_Rating",
+        "Overview",
+        "Meta_score",
+        "Director",
+        "Star1",
+        "Star2",
+        "Star3",
+        "Star4",
+        "No_of_Votes",
+        "Gross",
+    ]
+    df = df.copy()
+    for c in expected_cols:
+        if c not in df.columns:
+            df[c] = None
+    df = df[expected_cols]
+    df.to_sql(TABLE_NAME, conn, if_exists="append", index=False)
 
 
 def main(csv_path=None, out_dir=None):
@@ -62,11 +72,12 @@ def main(csv_path=None, out_dir=None):
         csv_path = str(RAW_DATA_PATH)
     if out_dir is None:
         out_dir = DATABASE_PATH.parent
-    
+
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    df_raw = pd.read_csv(csv_path, sep=",", quotechar='"', encoding="utf-8", low_memory=False)
-    # Aplicar preprocessamento
+    df_raw = pd.read_csv(
+        csv_path, sep=",", quotechar='"', encoding="utf-8", low_memory=False
+    )
     df = preprocess_movies_df(df_raw)
 
     prod_path = out_dir / "production.db"
@@ -75,14 +86,20 @@ def main(csv_path=None, out_dir=None):
     conn = sqlite3.connect(str(prod_path))
     try:
         create_table(conn)
-        insert_dataframe(conn, df)  # Inserir dados já preprocessados
+        insert_dataframe(conn, df)
     finally:
         conn.close()
     print("Bancos criados em:", out_dir)
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--csv", help=f"Caminho para o CSV bruto. Padrão: {RAW_DATA_PATH}")
-    parser.add_argument("--out-dir", help=f"Diretório de saída para os .db. Padrão: {DATABASE_PATH.parent}")
+    parser.add_argument(
+        "--csv", help=f"Caminho para o CSV bruto. Padrão: {RAW_DATA_PATH}"
+    )
+    parser.add_argument(
+        "--out-dir",
+        help=f"Diretório de saída para os .db. Padrão: {DATABASE_PATH.parent}",
+    )
     args = parser.parse_args()
     main(args.csv, args.out_dir)

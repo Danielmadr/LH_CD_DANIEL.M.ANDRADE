@@ -3,7 +3,6 @@ import json
 import sys
 from pathlib import Path
 
-# Adicionar pasta raiz ao path para importar config
 root_dir = Path(__file__).parent.parent
 sys.path.append(str(root_dir))
 
@@ -14,10 +13,8 @@ from scripts.utils import load_model
 def predict(model_path, input_json, reference_csv=None):
     if reference_csv is None:
         reference_csv = str(RAW_DATA_PATH)
-    # Carregar modelo
     model = load_model(model_path)
 
-    # Carregar JSON como DataFrame
     if isinstance(input_json, str):
         input_data = json.loads(input_json)
     else:
@@ -25,15 +22,12 @@ def predict(model_path, input_json, reference_csv=None):
 
     df_input = pd.DataFrame([input_data])
 
-    # 🔹 Carregar dataset de treino (para alinhar colunas)
     df_ref = pd.read_csv(reference_csv)
     df_ref = basic_clean(df_ref)
     train_cols = df_ref.drop(columns=["IMDB_Rating"]).columns
 
-    # 🔹 Pré-processar entrada
     df_input_clean = basic_clean(df_input)
 
-    # Garantir mesmas colunas que treino
     missing_cols = [col for col in train_cols if col not in df_input_clean.columns]
     if missing_cols:
         df_missing = pd.DataFrame(0, index=df_input_clean.index, columns=missing_cols)
@@ -41,13 +35,11 @@ def predict(model_path, input_json, reference_csv=None):
 
     df_input_clean = df_input_clean[train_cols]
 
-    # Fazer predição
     pred = model.predict(df_input_clean.astype("float32"))[0]
     return pred
 
 
 if __name__ == "__main__":
-    # Exemplo: python scripts/predict.py models/xgb_model.pkl
     shawshank = {
         'Series_Title': 'The Shawshank Redemption',
         'Released_Year': 1994,
