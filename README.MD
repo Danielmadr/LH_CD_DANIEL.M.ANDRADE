@@ -40,38 +40,26 @@ Este projeto é uma aplicação de Machine Learning para predição de notas IMD
 ## 📈 Performance dos Modelos
 
 ### 📈 Comparação de Modelos
-
 ```mermaid
-bar
-    title: Comparação de Métricas (quanto menor RMSE/MAE, melhor; quanto maior R², melhor)
-    orientation: horizontal
-    x-axis: Valor
-    y-axis: Modelo
-    series:
-      - title: RMSE
-        data:
-          - x: 0.1937
-            y: RandomForest
-          - x: 0.1802
-            y: XGBoost
-          - x: 0.0883
-            y: XGBoost (Optuna)
-      - title: MAE
-        data:
-          - x: 0.1534
-            y: RandomForest
-          - x: 0.1453
-            y: XGBoost
-          - x: 0.0697
-            y: XGBoost (Optuna)
-      - title: R²
-        data:
-          - x: 0.5536
-            y: RandomForest
-          - x: 0.6136
-            y: XGBoost
-          - x: 0.9073
-            y: XGBoost (Optuna)
+  pie showData
+    title RMSE (quanto menor, melhor)
+    "RandomForest (0.1937)" : 0.1937
+    "XGBoost (0.1802)" : 0.1802
+    "XGBoost Optuna (0.0883)" : 0.0883
+```
+```mermaid
+  pie showData
+    title MAE (quanto menor, melhor)
+    "RandomForest (0.1534)" : 0.1534
+    "XGBoost (0.1453)" : 0.1453
+    "XGBoost Optuna (0.0697)" : 0.0697
+```
+```mermaid
+  pie showData
+    title R² (quanto maior, melhor)
+    "RandomForest (0.5536)" : 0.5536
+    "XGBoost (0.6136)" : 0.6136
+    "XGBoost Optuna (0.9073)" : 0.9073
 ```
 
 ## 🛠️ Instalação e Execução
