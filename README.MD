@@ -1,6 +1,6 @@
 # 🎬 Projeto de Predição de Notas IMDB
 
-Este projeto é uma aplicação completa de Machine Learning para predição de notas IMDB de filmes, desenvolvida com **Streamlit** e incluindo análise exploratória de dados (EDA) e três modelos de ML treinados.
+Este projeto é uma aplicação de Machine Learning para predição de notas IMDB de filmes, desenvolvida com **Streamlit** e incluindo análise exploratória de dados (EDA) e três modelos de ML treinados.
 
 ![Tela Principal da Aplicação](docs/screenshots/main_page.png)
 _[Placeholder: Screenshot da página principal da aplicação]_
@@ -45,58 +45,20 @@ _[Placeholder: Screenshot da página de predição]_
 ![Comparação de Modelos](docs/screenshots/model_comparison.png)
 _[Placeholder: Gráfico comparativo da performance dos modelos]_
 
-### 📊 RandomForest
-
-- **RMSE:** 0.1937
-- **MAE:** 0.1534
-- **R²:** 0.5536
-- **Top Features:**
-  1. Log_Votes: 0.2643
-  2. No_of_Votes: 0.2539
-  3. Meta_score: 0.0933
-  4. Released_Year: 0.0612
-  5. Movie_Age: 0.0610
-
-### 📊 XGBoost
-
-- **RMSE:** 0.1802
-- **MAE:** 0.1453
-- **R²:** 0.6136
-- **Top Features:**
-  1. Genre_Drama,Horror,Mystery: 0.1110
-  2. No_of_Votes: 0.0838
-  3. Genre_Drama,Thriller,War: 0.0727
-  4. Genre_Action,Sci-Fi,Thriller: 0.0641
-  5. Genre_Action,Sci-Fi: 0.0613
-
-### 📊 XGBoost (Optuna) - **RECOMENDADO**
-
-- **RMSE:** 0.0883
-- **MAE:** 0.0697
-- **R²:** 0.9073
-- **Top Features:**
-  1. High_Votes: 0.2094
-  2. No_of_Votes: 0.0708
-  3. Log_Votes: 0.0546
-  4. Decade: 0.0535
-  5. Is_Classic: 0.0487
-
-![Feature Importance](docs/screenshots/feature_importance.png)
-_[Placeholder: Gráfico de importância das features do melhor modelo]_
-
 ## 🛠️ Instalação e Execução
 
 ### Pré-requisitos
 
 - Python 3.8+
 - pip
+- Verifique `requirements.txt`
 
 ### Configuração do Ambiente
 
 1. **Clone o repositório:**
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Danielmadr/LH_CD_DANIEL.M.ANDRADE
 cd LH_CD_DANIEL.M.ANDRADE
 ```
 
@@ -114,7 +76,7 @@ python -m venv .venv
 4. **Instale as dependências:**
 
 ```bash
-pip install streamlit pandas numpy scikit-learn xgboost optuna sqlite3
+pip install -r requirements.txt
 ```
 
 ### Executando a Aplicação
@@ -234,13 +196,6 @@ _[Placeholder: Screenshot da predição via JSON]_
 - **6.0-6.9:** 👌 Bom filme, mas pode não agradar a todos
 - **< 6.0:** 👎 Nota baixa, possíveis problemas de qualidade
 
-## 🔧 Features Importantes para Predição
-
-- **Número de Votos:** Mais votos = melhor predição
-- **Meta Score:** Nota da crítica especializada
-- **Gênero:** Impacta significativamente na nota
-- **Ano de Lançamento:** Filmes clássicos têm padrões diferentes
-- **Duração:** Filmes muito curtos/longos podem ter notas diferentes
 
 ## 🛠️ Pipeline de Machine Learning
 
@@ -312,64 +267,38 @@ O projeto utiliza SQLite para armazenamento:
 - **Localização:** `data/production.db`
 - **Estrutura:** Dados processados e prontos para ML
 
-### Comandos úteis:
-
-```bash
-# Recriar banco do zero
-python scripts/init_db.py --csv data/raw/desafio_indicium_imdb.csv --db data/production.db
-```
-
 ## 📋 Dependências Completas
 
 ```
-streamlit>=1.28.0
-pandas>=1.5.0
-numpy>=1.24.0
-scikit-learn>=1.3.0
-xgboost>=1.7.0
-optuna>=3.0.0
-sqlite3 (built-in)
+pandas==2.3.2
+numpy==2.3.2
+scikit-learn==1.7.1
+xgboost==3.0.5
+optuna==4.5.0
+streamlit==1.49.1
+plotly==6.3.0
+matplotlib==3.10.6
+wordcloud==1.9.4
+SQLAlchemy==2.0.43
 ```
 
 ## 🤝 Contribuição
 
-Este projeto foi desenvolvido como parte de um desafio de Data Science. Sugestões e melhorias são bem-vindas!
+Este projeto foi desenvolvido como parte de um desafio da Lighthouse de Data Science. Sugestões e melhorias são bem-vindas!
 
-### Como Contribuir:
-
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
 
 ## 📈 Próximos Passos
 
 - [ ] Implementar mais modelos (CatBoost, LightGBM)
 - [ ] Adicionar explicabilidade com SHAP
-- [ ] Deploy em produção (Heroku/Streamlit Cloud)
-- [ ] API REST para predições
-- [ ] Interface mobile-friendly
-- [ ] Cache de predições
 - [ ] Monitoramento de drift de dados
 
 ## 🏆 Resultados Alcançados
 
 - ✅ **R² = 0.9073** com XGBoost + Optuna
-- ✅ **Interface intuitiva** para usuários não-técnicos
 - ✅ **Pipeline completo** de ML
 - ✅ **Documentação abrangente**
 - ✅ **Código modular** e reutilizável
-
-![Arquitetura do Sistema](docs/screenshots/system_architecture.png)
-_[Placeholder: Diagrama da arquitetura do sistema]_
-
-## 📞 Contato
-
-- **Autor:** Daniel M. Andrade
-- **Email:** [seu-email@exemplo.com]
-- **LinkedIn:** [seu-linkedin]
-- **GitHub:** [@Danielmadr](https://github.com/Danielmadr)
 
 ## 📄 Licença
 

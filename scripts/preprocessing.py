@@ -6,6 +6,8 @@ from pathlib import Path
 root_dir = Path(__file__).parent.parent
 sys.path.append(str(root_dir))
 
+from scripts.preprocess import preprocess_movies_df
+
 from config import (
     CURRENT_YEAR,
     COLS_TO_DROP,
@@ -14,8 +16,6 @@ from config import (
     LONG_MOVIE_THRESHOLD,
     SHORT_MOVIE_THRESHOLD,
 )
-from preprocess import preprocess_movies_df
-
 
 def basic_clean(df):
     df = df.copy()
